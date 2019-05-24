@@ -34,15 +34,17 @@ if (Test-Path $cmder_install) {
 	}
 } else {
 	Write-Output "Downloading Cmder $cmder_version..."
-	Invoke-WebRequest -Uri $cmder_url -OutFile $cmder_download
+	# https://stackoverflow.com/a/41618979/2899390
+	[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+	Invoke-WebRequest -Uri $cmder_url -OutFile $cmder_download -ErrorAction Stop
 
 	Write-Output "Unpacking cmder.zip..."
-	Expand-Archive -LiteralPath $cmder_download -DestinationPath $cmder_install
+	Expand-Archive -LiteralPath $cmder_download -DestinationPath $cmder_install -ErrorAction Stop
 }
 Write-Output ''
 
 Write-Output "Configuring Cmder..."
-Copy-Item $seeq_config\* $cmder_config -Recurse -Force
+Copy-Item $seeq_config\* $cmder_config -Recurse -Force -ErrorAction Stop
 Write-Output ''
 
 Write-Output "Setup $bashrc..."
