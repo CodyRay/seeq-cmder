@@ -6,8 +6,43 @@ $cmder_url = "https://github.com/cmderdev/cmder/releases/download/$cmder_version
 $cmder_download = "$tmp\cmder.zip"
 $cmder_install = "$target\Cmder"
 $cmder_config = "$cmder_install\config"
+$cmder_git_for_windows = "$cmder_install\vendor\git-for-windows"
 $bashrc = "~/.bashrc"
 $startup_directory = "~"
+$pacman_repository = 'http://repo.msys2.org/msys/x86_64'
+$pacman_packages = @(
+	'rsync-3.1.3-1-x86_64.pkg.tar.xz'
+	'tree-1.8.0-1-x86_64.pkg.tar.xz'
+	'libgpgme-1.6.0-1-x86_64.pkg.tar.xz' # Dependency of wget
+	'wget-1.20.3-1-x86_64.pkg.tar.xz'
+)
+
+function Unix-Style ($path) {
+	$path  -replace '\\','/' -replace '//','/' -replace ' ','\\ '
+}
+
+function Install-AllPacmanPackages {
+	$pacman_packages | foreach {
+		Install-PacmanPackage $_
+	}
+}
+
+function Install-PacmanPackage($package) {
+	$package_url = "$pacman_repository/$package"
+	$package_download = "$tmp/$package"
+	Write-Output "Downloading $package_url..."
+	# https://stackoverflow.com/a/41618979/2899390
+	[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+	Invoke-WebRequest -Uri $package_url -OutFile $package_download -ErrorAction Stop
+
+	# A pacman package is a mirror of the root filesystem with some metadata files. Extract
+	# to the git for windows root file system and delete the metadata files
+	& "$cmder_git_for_windows\bin\bash.exe" -c "tar xf $(Unix-Style $package_download) -C $(Unix-Style $cmder_git_for_windows)"
+	Remove-Item -Force "$cmder_git_for_windows/.PKGINFO" -ErrorAction Ignore
+	Remove-Item -Force "$cmder_git_for_windows/.BUILDINFO" -ErrorAction Ignore
+	Remove-Item -Force "$cmder_git_for_windows/.MTREE" -ErrorAction Ignore
+	Remove-Item -Force "$cmder_git_for_windows/.INSTALL" -ErrorAction Ignore
+}
 
 function Get-YesNoQuestion($prompt) {
 	$confirmation = ''
@@ -29,7 +64,7 @@ New-Item -Path $tmp -ItemType Directory -Force | Out-Null
 New-Item -Path $target -ItemType Directory -Force | Out-Null
 
 if (Test-Path $cmder_install) {
-	if (!(Get-YesNoQuestion "Cmder is already installed at $cmder_install; Continue configuring?")) {
+	if (!(Get-YesNoQuestion "Cmder is already installed at $cmder_install; Continue configuring? (to update Cmder answer no and relocate that directory)")) {
 		exit
 	}
 } else {
@@ -40,6 +75,11 @@ if (Test-Path $cmder_install) {
 
 	Write-Output "Unpacking cmder.zip..."
 	Expand-Archive -LiteralPath $cmder_download -DestinationPath $cmder_install -ErrorAction Stop
+
+	
+	if (Get-YesNoQuestion "Install extra tools like rsync, tree, wget?") {
+		Install-AllPacmanPackages
+	}
 }
 Write-Output ''
 
