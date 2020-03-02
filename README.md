@@ -23,6 +23,18 @@ Changes from default Cmder experienc:
 * Ability to change the startup directory, create desktop shortcut, bind to context menu all from the install script
 * Other things that I have probably forgoten... :)
 
+## Upgrading
+
+Periodically the scripts here will be updated, it shouldn't be necessary to update since ConEmu will update itself.
+However, occasionally new versions of git for windows are released that are worth updating for.
+
+1. Rename your Cmder directory (likely `~/bin/Cmder`)
+   * You might need to use task manager or process explorer to kill `ssh_agent.exe`
+2. Pull the latest changes or download this repository as a zip
+3. Re-execute "install.bat" and re-answer prompts
+4. Copy over any configuration that you want to keep:
+   * `~/bin/Cmder/config/user-ConEmu.xml` contains all the settings configured in the settings UI
+
 ## Optional Things
 
 ### Fancy Prompt
@@ -76,3 +88,18 @@ enable_sq_helpers
 ```
 
 So that there is no dependence on Cmder providing that environment variable
+
+> I'd like to pin Cmder to the windows taskbar, but it ends up always starting in the Cmder directory!
+
+For some reason different windows machines behave differently with this; I don't have a good explaination.
+
+I have been able to workaround it by
+
+1. Run Cmder
+2. Right click on it in the taskbar
+3. Select Pin
+4. Close Cmder
+5. Right click on the pinned icon in the taskbar
+6. Right click again on Cmder in the dropup that is shown
+7. Select Properties
+8. Change the start-in directory to match the directory you'd like to have cmder start up in
