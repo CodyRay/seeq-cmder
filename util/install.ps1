@@ -1,7 +1,7 @@
 $target = '~/bin'
 $tmp = '.\tmp'
 $seeq_config = '.\config'
-$cmder_version = 'v1.3.11'
+$cmder_version = 'v1.3.14'
 $cmder_url = "https://github.com/cmderdev/cmder/releases/download/$cmder_version/cmder.zip"
 $cmder_download = "$tmp\cmder.zip"
 $cmder_install = "$target\Cmder"
