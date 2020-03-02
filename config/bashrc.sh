@@ -54,7 +54,20 @@ function fancy_seeq_prompt {
     SQ_ALTER_PS1=false
 
     __parse_git_branch() {
-        git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/'
+        git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1)/'
+    }
+
+    __parse_git_root() {
+        local GIT_ROOT=$(git rev-parse --show-toplevel 2> /dev/null)
+        if [ -z "$GIT_ROOT" ]
+        then
+           echo -n ""
+        elif [[ $GIT_ROOT -ef $PWD ]]
+        then
+           echo -n " <*>"
+        else
+           echo -n " <*${GIT_ROOT##*/}>"
+        fi
     }
 
     function __fancy_seeq_prompt_command {
@@ -63,16 +76,18 @@ function fancy_seeq_prompt {
 
         local Clear='\[\e[0m\]'
 
-        local Red='\[\e[0;31m\]'
-        local Gre='\[\e[0;32m\]'
+        local Red='\[\e[2;31m\]'
+        local Gre='\[\e[2;32m\]'
+        local BGre='\[\e[1;32m\]'
         local BYel='\[\e[1;33m\]'
         local BBlu='\[\e[1;34m\]'
-        local Pur='\[\e[0;35m\]'
+        local Pur='\[\e[2;35m\]'
+        local Cya='\[\e[2;35m\]'
 
-        PS1+="${BYel}[\W]${Clear}"
+        PS1+="${BYel}[${BYel}\W]${Cya}${Clear}"
 
         # __git_ps1 is slow and I don't think it is that valuable
-        PS1+="${Gre}$(__parse_git_branch)${Clear}"
+        PS1+="${BGre}$(__parse_git_root)${Gre}$(__parse_git_branch)${Clear}"
 
         if [ $EXIT != 0 ]; then
             PS1+=" ${Red}${EXIT}${Clear}"
