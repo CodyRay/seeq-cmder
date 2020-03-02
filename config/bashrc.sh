@@ -158,8 +158,8 @@ function enable_sq_helpers {
 
         if [ -z ${@+x} ] # is there not a first argument?
         then
-            # Run a new bash so that you can `exit` out
-            bash --rcfile <(echo '. ~/.bashrc; . environment')
+            # Run a new bash so that you can `exit` out - bash --rcfile <(echo '. ~/.bashrc; . environment') doesn't work
+            echo ". ~/.bashrc; . environment; rm -rf .tmp.bashrc" > .tmp.bashrc && bash --rcfile .tmp.bashrc
         else 
             # Run the command in a shell so that it doesn't polute
             (. environment && "$@")
