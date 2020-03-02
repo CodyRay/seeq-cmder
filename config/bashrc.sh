@@ -135,9 +135,13 @@ function tilfail {
 # Enable by placing `enable_sq_helpers` in bashrc
 #
 function enable_sq_helpers {
-    # Short cut for running a command in the seeq environment. Ex: "e grunt server" to 
-    # call ". environment" then "grunt server" in a subshell or just "e" to run 
-    # ". environment". If `./sq install" hasn't been run it is run!
+    SQ_HELPERS_DOCS=()
+
+    SQ_HELPERS_DOCS+=('!e'
+        'Shortcut for running a command in the seeq environment.'
+        'If `./sq install" has not been run it is run!'
+        'Ex: "e grunt server" to call ". environment" then "grunt server"'
+        'in a subshell or just "e" to run ". environment".')
     function e {
         if [ ! -z "${SQ_TOOLCHAIN_FOLDER}" ] # has . environment been run?
         then
@@ -166,35 +170,113 @@ function enable_sq_helpers {
         fi
     }
 
-    # Ex: "sqe run --clean"
+    function _sq_cd_root {
+        git rev-parse --show-toplevel > /dev/null && cd $(git rev-parse --show-toplevel)
+    }
+
+    SQ_HELPERS_DOCS+=('!sqe' 
+        'Shortcut for running a `sq` command in the seeq environment.' 
+        'Ex: "sqe run --clean"')
     function sqe {
         e sq "$@"
     }
 
-    # Like `sqe` but allways do sq install fresh
+    SQ_HELPERS_DOCS+=('!sqi' 
+        'Shortcut for running a `sq` command in the seeq environment but' 
+        '`./sq install` is ran before executing the command.'
+        'Ex: "sqi build -f"')
     function sqi {
         ./sq install && 
         sqe "$@"
     }
 
-    # Like `sqe` but rebuild the whole project
+    SQ_HELPERS_DOCS+=('!sqbweb' 
+        'Shortcut for building appserver, sdk, and finally webserver.' 
+        'This is helpful for rebuilding the components that change the'
+        'most frequently.'
+        'Ex: "sqbweb"')
+    function sqbweb {
+        (
+        if [ ! -f ./environment ] # does the environment file not exist?
+        then
+            # create the environment file
+            (./sq install) || return 1;
+        fi
+        _sq_cd_root &&
+        cd 'appserver' &&
+        sqi build -f &&
+
+        _sq_cd_root &&
+        cd 'sdk' &&
+        sqi build -f &&
+
+        _sq_cd_root &&
+        cd 'sdk' &&
+        sqi build -f &&
+
+        _sq_cd_root &&
+        sqe image -n
+        )
+    }
+
+    SQ_HELPERS_DOCS+=('!sqr' 
+        'Like `sqe` but always run in the root' 
+        'Ex: "sqr ide"')
+    function sqr {
+        (
+        _sq_cd_root &&
+        sqe "$@"
+        )
+    }
+
+    SQ_HELPERS_DOCS+=('!sqv' 
+        'Determine the version of the checked out branch' 
+        'Ex: "sqv"')
+    function sqv {
+        (
+        _sq_cd_root &&
+        source <(cat variables.ini | grep -E '^VERSION_(PREFIX|MAJOR|MINOR|PATCH)') &&
+        echo $VERSION_PREFIX.$VERSION_MAJOR.$VERSION_MINOR.$VERSION_PATCH
+        )
+    }
+
+    SQ_HELPERS_DOCS+=('!sqb' 
+        'Like `sqe` but rebuild the whole project before running the command.' 
+        'The command is optional, `sq` will print a nice help message if there'
+        'is no command provided. The -m memoized mode is used.'
+        'Ex: "sqb run" - rebuilds everything and the runs sq run')
     function sqb {
-        sqi build -f &&
+        (
+        _sq_cd_root &&
+        sqi build -fm &&
         sqe image -n &&
         sqe "$@"
+        )
     }
 
-    # Like "sq refresh" but with "clean -f". you can pass a sq command to run after. 
-    # Ex: "sqcb ide" or "sqcb run --clean"
+
+    SQ_HELPERS_DOCS+=('!sqcb' 
+        'Like `sqb` but uses a clean build.'
+        'Ex: "sqcb run --clean" - rebuilds everything and the runs sq run')
     function sqcb {
-        sqe clean &&
+        (
+        _sq_cd_root &&
+        git clean -dfx &&
         sqi build -f &&
         sqe image -n &&
         sqe "$@"
+        )
     }
 
-    # Pushes up manual test results, makes sure that the tests build before pushing
-    function sqsynctests {
-        git pull --rebase && (cd behavior/ && sqe build -f) && git push
+    function sqhelp {
+        local IFS=""
+        for DOC in "${SQ_HELPERS_DOCS[@]}"
+        do
+            if [[ "$DOC" =~ ^!.* ]]; then
+                printf "%s\n" ${DOC#?}
+            else
+                printf "\t%s\n" $DOC
+            fi
+        done
     }
 }
