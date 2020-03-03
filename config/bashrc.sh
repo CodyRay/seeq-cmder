@@ -12,7 +12,7 @@ function conemu_working_directory_support {
 
     # For environments that don't support ANSI escape sequences
     # Don't even try for WSL - it can't work
-    CONEMU_STORE="ConEmuC -StoreCWD"
+    CONEMU_STORE='$ConEmuDir/ConEmu/ConEmuC -StoreCWD'
     if ! grep -q Microsoft /proc/version; then
         if [[ -n "${ConEmuPID}" ]]; then
             if [[ $PROMPT_COMMAND != *"$CONEMU_STORE"* ]]; then
