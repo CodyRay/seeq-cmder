@@ -25,8 +25,7 @@ Changes from default Cmder experienc:
 
 ## Upgrading
 
-Periodically the scripts here will be updated, it shouldn't be necessary to update since ConEmu will update itself.
-However, occasionally new versions of git for windows are released that are worth updating for.
+Periodically the scripts here will be updated. ConEmu will update itself, but occasionally new versions of git for windows are released that are worth updating for.
 
 1. Rename your Cmder directory (likely `~/bin/Cmder`)
    * You might need to use task manager or process explorer to kill `ssh_agent.exe`
