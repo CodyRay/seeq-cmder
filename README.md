@@ -32,7 +32,7 @@ Periodically the scripts here will be updated. ConEmu will update itself, but oc
 2. Pull the latest changes or download this repository as a zip
 3. Re-execute "install.bat" and re-answer prompts
 4. Copy over any configuration that you want to keep:
-   * `~/bin/Cmder/config/user-ConEmu.xml` contains all the settings configured in the settings UI
+   * For example you might want to copy over`config/user-ConEmu.xml` from your backup since it contains all the settings and keymaps configured in the settings UI
 
 ## Optional Things
 
