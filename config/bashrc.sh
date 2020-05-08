@@ -96,6 +96,10 @@ function fancy_seeq_prompt {
         if [ -n "$SQ_TOOLCHAIN_FOLDER" ]; then
             PS1+=" ${BBlu}sq:${project}${Clear}"
         fi
+        
+        if [ -n "$VIRTUAL_ENV" ]; then
+            PS1+=" ${BBlu}($(basename $VIRTUAL_ENV))${Clear}"
+        fi
 
         PS1+=" ${Pur}\$${Clear} "
     }
