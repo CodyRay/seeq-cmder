@@ -239,8 +239,8 @@ function enable_sq_helpers {
     function sqv {
         (
         _sq_cd_root &&
-        source <(cat variables.ini | grep -E '^VERSION_(PREFIX|MAJOR|MINOR|PATCH)') &&
-        echo $VERSION_PREFIX.$VERSION_MAJOR.$VERSION_MINOR.$VERSION_PATCH
+        source <(cat variables.ini | grep -E '^VERSION_(MAJOR|MINOR|PATCH)') &&
+        echo $VERSION_MAJOR.$VERSION_MINOR.$VERSION_PATCH
         )
     }
 
@@ -270,6 +270,20 @@ function enable_sq_helpers {
         sqe image -n &&
         sqe "$@"
         )
+    }
+
+    SQ_HELPERS_DOCS+=('!sqwt'
+        'List all worktrees or runs a command in all git worktrees'
+        'Ex: "sqwt" - list worktrees; "sqwt git status" - runs git status in all worktrees')
+    function sqwt {
+        if [ -z ${@+x} ] # is there not a first argument?
+        then
+            join <(git worktree list | awk '{ printf "%s,%s,%s %s\n",$1,$2,$3,$4 }') <(git worktree list | awk '{ print $1 }' | xargs -i bash -c 'source <(cat {}/variables.ini | grep -E "^VERSION_(MAJOR|MINOR|PATCH)") && echo "{},$VERSION_MAJOR.$VERSION_MINOR.$VERSION_PATCH"') -t , -o '0,2.2,1.2,1.3,1.4' | column -s , -t
+        else
+            WT_USER_COMMAND="$@"
+            WT_CD_COMMAND='echo "" && echo "*****************************************************************" && echo "* {}" && echo "*****************************************************************" && cd {}'
+            git worktree list | awk '{ print $1 }' | xargs -i bash -c "$WT_CD_COMMAND && $WT_USER_COMMAND"
+        fi
     }
 
     function sqhelp {
