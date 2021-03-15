@@ -247,12 +247,12 @@ function enable_sq_helpers {
     SQ_HELPERS_DOCS+=('!sqb' 
         'Like `sqe` but rebuild the whole project before running the command.' 
         'The command is optional, `sq` will print a nice help message if there'
-        'is no command provided. The -m memoized mode is used.'
+        'is no command provided.'
         'Ex: "sqb run" - rebuilds everything and the runs sq run')
     function sqb {
         (
         _sq_cd_root &&
-        sqi build -fm &&
+        sqi build -f &&
         sqe image -n &&
         sqe "$@"
         )
