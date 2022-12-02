@@ -1,3 +1,5 @@
+ARCHIVED: I'd now recommend [Windows Terminal](https://learn.microsoft.com/en-us/windows/terminal/install)
+
 # Seeq Cmder
 
 To Setup:
